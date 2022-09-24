@@ -1,27 +1,52 @@
 const express = require('express');
-const httpProxy = require('express-http-proxy');
+const usersRoute = require('./Routes/userRoutes');
 const PORT = 3200;
-const app = express({port: PORT});
-const discovery = require('./discovery');
-const client = discovery.registerWithEureka('api-gateway', PORT)
-console.log('client', client)
-// const {
-//   USERS_API_URL,
-//   PRODUCTS_API_URL,
-// } = require('./URLs');
+const app = express({ port: PORT });
+const Eureka = require('eureka-js-client').Eureka;
+const eurekaHost = (process.env.EUREKA_CLIENT_SERVICEURL_DEFAULTZONE || '127.0.0.1');
+const eurekaPort = 9090;
+const hostName = (process.env.HOSTNAME || 'localhost')
+const ipAddr = '172.0.0.1';
 
-// const userServiceProxy = httpProxy(USERS_API_URL);
-// const productsServiceProxy = httpProxy(PRODUCTS_API_URL);
+const client = new Eureka({
+    instance: {
+        app: 'api-gateway',
+        hostName: hostName,
+        ipAddr: ipAddr,
+        port: {
+            '$': PORT,
+            '@enabled': 'true',
+        },
+        vipAddress: 'api-gateway',
+        dataCenterInfo: {
+            '@class': 'com.netflix.appinfo.InstanceInfo$DefaultDataCenterInfo',
+            name: 'MyOwn',
+        },
+    },
+    //retry 10 time for 3 minute 20 seconds.
+    eureka: {
+        host: eurekaHost,
+        port: eurekaPort,
+        servicePath: '/eureka/apps/',
+        maxRetries: 10,
+        requestRetryDelay: 2000,
+    },
+})
+client.start(error => {
+    console.log(error || "service registered")
+});
 
-// app.get('/', (req, res) => res.send('Hello Gateway API'));
+client.on('started', () => { })
 
-// app.get('/users', (req, res, next) => userServiceProxy(req, res, next));
-// app.get('/products', (req, res, next) => productsServiceProxy(req, res, next));
+
+app.use((req, res, next) => {
+    const userUrl = client.getInstancesByAppId('USER-SERVICE')
+    req.userUrl = "localhost" + ':' + userUrl[0].port.$;
+    return next();
+})
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }))
+app.use(usersRoute)
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
-
-const algo = client.getInstancesByAppId('USER-SERVICE')
-console.log('oi', algo)
-
-const algo2 = client.getInstancesByAppId('USER-SERVICE')
-console.log('oi', algo)
