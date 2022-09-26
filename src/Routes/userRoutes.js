@@ -23,6 +23,19 @@ usersRoute.put('/users/:uuid', async (req, res, next) => {
     userServiceProxy(req, res, next)
 });
 
+usersRoute.post('/login', async (req, res, next) => {
+    const userServiceProxy = httpProxy(req.userUrl);
+    userServiceProxy(req, res, next)
+
+})
+
+usersRoute.post('/token', (req, res, next) => {
+    const userServiceProxy = httpProxy(req.userUrl);
+    userServiceProxy(req, res, next)
+})
+
+export default authorizationRoute;
+
 
 
 
