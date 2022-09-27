@@ -7,6 +7,7 @@ const eurekaHost = (process.env.EUREKA_CLIENT_SERVICEURL_DEFAULTZONE || '127.0.0
 const eurekaPort = 9090;
 const hostName = (process.env.HOSTNAME || 'localhost')
 const ipAddr = '172.0.0.1';
+const cors = require('cors');
 
 const client = new Eureka({
     instance: {
@@ -38,7 +39,7 @@ client.start(error => {
 
 client.on('started', () => { })
 
-
+app.use(cors())
 app.use((req, res, next) => {
     const userUrl = client.getInstancesByAppId('USER-SERVICE')
     req.userUrl = "localhost" + ':' + userUrl[0].port.$;
