@@ -34,9 +34,5 @@ usersRoute.post('/token', (req, res, next) => {
     userServiceProxy(req, res, next)
 })
 
-export default authorizationRoute;
-
-
-
 
 module.exports = usersRoute;
