@@ -1,5 +1,6 @@
 const express = require('express');
 const usersRoute = require('./Routes/userRoutes');
+const productRoute = require('./Routes/productRoutes');
 const PORT = 3200;
 const app = express({ port: PORT });
 const Eureka = require('eureka-js-client').Eureka;
@@ -43,11 +44,15 @@ app.use(cors())
 app.use((req, res, next) => {
     const userUrl = client.getInstancesByAppId('USER-SERVICE')
     req.userUrl = "localhost" + ':' + userUrl[0].port.$;
+
+    const productsUrl = client.getInstancesByAppId('PRODUCT-SERVICE')
+    req.productsUrl = "localhost" + ':' + productsUrl[0].port.$;
     return next();
 })
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }))
 app.use(usersRoute)
+app.use(productRoute)
 
 app.listen(PORT, () => console.log(`Example app listening on port ${PORT}!`));
