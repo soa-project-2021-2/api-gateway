@@ -48,9 +48,8 @@ app.use((req, res, next) => {
 
     const productsUrl = client.getInstancesByAppId('PRODUCT-SERVICE')
     req.productsUrl = "localhost" + ':' + productsUrl[0].port.$;
-
-    const orderUrl = client.getInstancesByAppId('ORDER-SERVICE')
-    req.orderUrl = "localhost" + ':' + orderUrl[0].port.$;
+ 
+    req.orderUrl = "https://soa-order-service.herokuapp.com/";
 
     return next();
 })
